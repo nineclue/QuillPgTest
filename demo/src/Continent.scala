@@ -1,0 +1,1 @@
+case class Continent(id: Integer, name: String)
