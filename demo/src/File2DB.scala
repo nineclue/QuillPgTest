@@ -8,7 +8,7 @@ object File2DB {
         bufferedReader.lines().iterator().asScala
     }
     def apply(fname: String): Iterator[String] = apply(new File(fname))
-    // def splitedString(s: String) = s.split(csvSplitR)
+    def splitedString(s: String) = s.split(csvSplitR)
     def make[A](ss: Iterator[String])(implicit maker: Seq[String] => Option[A]): Iterator[A] = 
         ss.map(s => maker(s.split(csvSplitR))).flatten
 }

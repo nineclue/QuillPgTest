@@ -1,9 +1,9 @@
 case class City(id: Int, name: String, countryId: Int, continentId: Int)
 
 object City {
-    import DB.ctx._
+    import DB._, DB.ctx._
 
-    def maker(ss: Seq[String]): Option[City] = {
+    def apply(ss: Seq[String]): Option[City] = {
         println(s"processing : $ss")
         val (cityName, countryName, continentName) = (ss(0), ss(1), ss(2))
         val countryId = DB.ctx.run(query[Country].filter(_.name == lift(countryName)).map(_.id)) match {
