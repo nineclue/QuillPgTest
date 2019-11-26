@@ -1,1 +1,1 @@
-case class Continent(id: Integer, name: String)
+case class Continent(id: Int, name: String)
