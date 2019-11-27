@@ -4,8 +4,8 @@ trait DBFlexible {
 
     val id: Int
     val name: String
-    def getIdOrCreate[A <: DBFlexible](ctx: Context[_, _], q: Query[A], maker: String => A)(name: String): Int = {
-        val nameQuery = quote { q.filter(_.name == lift(name)) }
+    def selectOrInsert[A <: DBFlexible](ctx: Context[_, _], q: Query[A], maker: String => A)(name: String): Int = {
+        val nameQuery = q.filter(_.name == lift(name)).map(_.id) 
         ctx.run(nameQuery) match {
             case Nil => 
                 ctx.run(q.insert(lift(maker(name))).returningGenerated(_.id))

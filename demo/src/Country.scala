@@ -1,1 +1,1 @@
-case class Country(id: Int, name: String)
+case class Country(id: Int, name: String) extends DBFlexible
