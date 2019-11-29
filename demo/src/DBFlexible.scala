@@ -4,11 +4,10 @@ trait DBFlexible {
 
     val id: Int
     val name: String
-    def selectOrInsert[A <: DBFlexible](ctx: Context[_, _], q: Query[A], maker: String => A)(name: String): Int = {
-        val nameQuery = q.filter(_.name == lift(name)).map(_.id) 
-        ctx.run(nameQuery) match {
+    def selectOrInsert[A <: DBFlexible](q: Quoted[Query[A]], name: String)(implicit en: Encoder[A], maker: String => A): Int = {
+        DB.ctx.run(q.filter(_.name == lift(name)).map(_.id)) match {
             case Nil => 
-                ctx.run(q.insert(lift(maker(name))).returningGenerated(_.id))
+                DB.ctx.run(q.insert(lift(maker(name))).returningGenerated(_.id))
             case iid::_ => 
                 iid
         }
