@@ -4,12 +4,22 @@ trait DBFlexible {
 
     val id: Int
     val name: String
-    def selectOrInsert[A <: DBFlexible](q: Quoted[Query[A]], name: String)(implicit en: Encoder[A], maker: String => A): Int = {
-        DB.ctx.run(q.filter(_.name == lift(name)).map(_.id)) match {
+    def selectOrInsert[A <: DBFlexible](tname: String, name: String)(implicit maker: String => A, encoder: Encoder[A]): Int = {
+        val dySchema = DB.ctx.dynamicQuerySchema[A](tname)
+        DB.ctx.run(dySchema.filter(_.name == lift(name)).map(_.id)) match {
             case Nil => 
-                DB.ctx.run(q.insert(lift(maker(name))).returningGenerated(_.id))
+                DB.ctx.run(dySchema.insertValue(quote(lift(maker(name)))).returningGenerated(_.id))
             case iid::_ => 
                 iid
         }
     }
+    /*
+    val dynamicSchema = context.dynamicQuerySchema[MyDBClass](tableNameVar)
+
+    context.transaction {
+        myCollection.foreach { p =>
+            context.run(dynamicSchema.insertValue(p))
+        }
+    }
+    */
 }
