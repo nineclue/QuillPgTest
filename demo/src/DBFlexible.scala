@@ -1,22 +1,15 @@
 import io.getquill.context.{Context => dbContext}
 import scala.reflect.macros.whitebox.{Context => mContext}
-// import scala.reflect.macros.{Context => mContext}
 import scala.language.experimental.macros
 import scala.reflect.runtime.{universe => ru}
 
-trait DBFlexible {
+trait HasIdName {
     val id: Int
     val name: String
-    def selectOrInsert[A <: DBFlexible](name: String, maker: String => A): Int = macro DBFlexible.selectOrInsertImpl[A]
-    /*
-    val dynamicSchema = context.dynamicQuerySchema[MyDBClass](tableNameVar)
+}
 
-    context.transaction {
-        myCollection.foreach { p =>
-            context.run(dynamicSchema.insertValue(p))
-        }
-    }
-    */
+trait DBFlexible {
+    def selectOrInsert[A <: HasIdName](name: String, maker: String => A): Int = macro DBFlexible.selectOrInsertImpl[A]
 }
 
 object DBFlexible {
@@ -25,9 +18,9 @@ object DBFlexible {
 
         q"""
         import DB.ctx._
-        DB.ctx.run(dySchema.filter(_.name == lift(name)).map(_.id)) match {
+        DB.ctx.run(query[A].filter(_.name == lift(name)).map(_.id)) match {
             case Nil => 
-                DB.ctx.run(dySchema.insertValue(quote(lift(maker(name)))).returningGenerated(_.id))
+                DB.ctx.run(query[A].insertValue(quote(lift(maker(name)))).returningGenerated(_.id))
             case iid::_ => 
                 iid
         }
